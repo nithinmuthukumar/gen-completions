@@ -2,6 +2,7 @@ mod bash;
 mod carapace;
 mod kdl;
 mod nu;
+mod shrs;
 mod util;
 mod zsh;
 
@@ -26,6 +27,8 @@ pub enum OutputFormat {
   Bash,
   /// Generate completions for Nushell
   Nu,
+  /// Generate completions for shrs
+  Rhai,
   /// Output parsed options as KDL
   Kdl,
   /// Output parsed options as JSON
@@ -74,6 +77,7 @@ fn generate(cmd: &CommandInfo, format: OutputFormat) -> (String, String) {
     OutputFormat::Carapace => {
       (format!("{}.yaml", cmd.name), carapace::generate(&cmd))
     }
+    OutputFormat::Rhai => shrs::generate(&cmd),
   }
 }
 
