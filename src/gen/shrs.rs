@@ -2,75 +2,65 @@ use crate::gen::{util::Output, CommandInfo};
 
 /// Generate a completion file for Bash
 pub fn generate(cmd: &CommandInfo) -> (String, String) {
-  let comp_name = format!("_comp_cmd_{}", cmd.name);
+  let comp_name = format!("{}", cmd.name);
 
   let mut out = Output::new(String::from("\t"));
-  out.writeln("#!/usr/bin/env bash\n");
-  out.writeln(format!("function {comp_name} {{"));
-  out.indent();
-  out.writeln("COMPREPLY=()");
+  out.writeln(format!("// Completion script generated for {}", cmd.name));
 
   generate_cmd(cmd, 1, &mut out);
 
-  out.writeln("return 0");
-  out.dedent();
-  out.writeln("}");
-  out.writeln("");
-
-  out.writeln(format!("complete -F _comp_cmd_{} {}", cmd.name, cmd.name));
-  out.writeln("");
-
-  (format!("_{}.bash", cmd.name), out.text())
+  (format!("{}.rhai", cmd.name), out.text())
 }
 
 fn generate_cmd(cmd: &CommandInfo, pos: usize, out: &mut Output) {
-  out.writeln("case $COMP_CWORD in");
-  out.indent();
-
-  let flags = cmd
-    .flags
-    .iter()
-    .map(|f| f.forms.join(" "))
-    .collect::<Vec<_>>()
-    .join(" ");
-  let subcmds = cmd
-    .subcommands
-    .iter()
-    .map(|c| c.name.to_string())
-    .collect::<Vec<_>>()
-    .join(" ");
-  let completions = if flags.is_empty() {
-    subcmds
-  } else if subcmds.is_empty() {
-    flags
-  } else {
-    format!("{flags} {subcmds}")
-  };
-  // This case is for when the subcommand we're processing is the one to
-  // complete
-  out.writeln(format!(
-    "{pos}) COMPREPLY=($(compgen -W '{completions}' -- $2)) ;;"
-  ));
-
-  // This case is in case we need to go further to a deeper subcommand
-  if !cmd.subcommands.is_empty() {
-    out.writeln("*)");
-    out.indent();
-    out.writeln(format!("case ${{COMP_WORDS[{pos}]}} in"));
-    out.indent();
-    for sub_cmd in &cmd.subcommands {
-      out.writeln(format!("{})", sub_cmd.name));
-      out.indent();
-      generate_cmd(sub_cmd, pos + 1, out);
-      out.writeln(";;");
-      out.dedent();
+  let mut long_flags = vec![];
+  let mut short_flags = vec![];
+  for flag in &cmd.flags {
+    let (long_forms, short_forms): (Vec<_>, Vec<_>) =
+      flag.forms.iter().partition(|f| f.starts_with("--"));
+    if let Some(d) = flag.desc.clone() {
+      long_flags.extend(
+        long_forms
+          .iter()
+          .map(|f| format!("{:?}", vec![f.to_owned().to_owned(), d.to_owned()]))
+          .collect::<Vec<String>>(),
+      );
     }
-    out.dedent();
-    out.writeln("esac");
-    out.writeln(";;");
-    out.dedent();
+    short_flags.extend(short_forms.to_owned());
   }
 
+  // predicate
+  out.writeln("fn predicate(ctx){");
+  out.indent();
+  out.writeln("let name = ctx.cmd_name;");
+  out.writeln(format!(r#"name!=()&&name=="{}""#, cmd.name));
   out.dedent();
-  out.writeln("esac");
+  out.writeln("}");
+
+  //completions
+  out.writeln("fn completions(ctx){");
+  out.indent();
+  out.writeln("if is_short_flag(ctx){");
+  out.indent();
+  out.writeln(format!("return with_format({:?});", short_flags));
+  out.dedent();
+  out.writeln("}");
+
+  out.writeln("if is_long_flag(ctx){");
+  out.indent();
+  out.writeln(format!("return with_format([{}]);", long_flags.join(",\n")));
+  out.dedent();
+  out.writeln("}");
+
+  out.writeln(format!(
+    "{:?}",
+    cmd
+      .subcommands
+      .iter()
+      .map(|s| s.name.clone())
+      .collect::<Vec<_>>()
+  ));
+
+  out.dedent();
+  out.writeln("}");
 }
