@@ -1,0 +1,14 @@
+// Completion script generated for cpp-13
+fn predicate(ctx){
+	let name = ctx.cmd_name;
+	name!=()&&name=="cpp-13"
+}
+fn completions(ctx){
+	if is_short_flag(ctx){
+		return with_format(["-dM", "-M.\n.IP", "-D", "-D", "-D", "-D", "-D'name(args", "-U", "-imacros", "-U", "-U", "-U", "-D", "-include", "-include", "-include", "-imacros", "-imacros", "-include", "-imacros", "-include.\n.IP", "-undef", "-undef", "-pthread", "-pthread", "-M", "-M", "-include", "-MT", "-MQ", "-newline", "-M", "-E", "-w.\n.IP", "-MM", "-MM", "-M", "-MM", "-MF", "-MF", "-M", "-MM", "-MF", "-MD", "-MMD", "-MF", "-MG", "-MG", "-M", "-MG", "-MG\nalso", "-Mno-modules", "-Mno-modules", "-MP", "-MP", "-MT", "-MT", "-MT", "-MT", "-MT", "-MT", "-MQ", "-MQ", "-MT", "-MQ", "-MD", "-MD", "-MD", "-M", "-MF", "-o", "-MD", "-E", "-E", "-o\nis", "-E", "-MD", "-MMD", "-MMD", "-MD", "-fpreprocessed", "-fpreprocessed", "-C", "-fdirectives-only", "-fdirectives-only", "-E", "-fpreprocessed\noptions.\n.Sp\nWith", "-E", "-dD", "-fpreprocessed", "-fdirectives-only\\*(C'.\n.Sp\nWith", "-E", "-fpreprocessed", "-fdirectives-only\\*(C'.\n.IP", "-fdollars-in-identifiers", "-fdollars-in-identifiers", "-fextended-identifiers", "-fextended-identifiers", "-fno-canonical-system-headers", "-fno-canonical-system-headers", "-fmax-include-depth", "-fmax-include-depth", "-ftabstop", "-ftabstop", "-ftrack-macro-expansion", "-ftrack-macro-expansion", "-fmacro-prefix-map", "-fmacro-prefix-map", "-fcanon-prefix-map.\n.IP", "-fexec-charset", "-fexec-charset", "-fwide-exec-charset", "-fwide-exec-charset", "-fexec-charset", "-finput-charset", "-finput-charset", "-fworking-directory", "-fworking-directory", "-fno-working-directory", "-P", "-A", "-A", "-A\npredicate(answer", "-A", "-predicate", "-A", "-predicate", "-C", "-C", "-C;", "-CC", "-CC", "-C", "-C", "-CC", "-P", "-P", "-traditional", "-traditional", "-traditional-cpp", "-traditional-cpp", "-E", "-trigraphs", "-trigraphs", "-std", "-remap", "-remap", "-H", "-H", "-dletters", "-dletters", "-D", "-D", "-U", "-include", "-imacros", "-undef", "-pthread", "-M", "-MM", "-MF", "-MG", "-Mno-modules", "-MP", "-MT", "-MQ", "-MD", "-MMD", "-fpreprocessed", "-fdirectives-only", "-fdollars-in-identifiers", "-fextended-identifiers", "-fno-canonical-system-headers", "-fmax-include-depth", "-ftabstop", "-ftrack-macro-expansion", "-fmacro-prefix-map", "-fexec-charset", "-fwide-exec-charset", "-finput-charset", "-fworking-directory", "-A", "-A", "-predicate", "-C", "-CC", "-P", "-traditional-cpp", "-trigraphs", "-remap", "-H", "-dletters", "-dM", "-dD", "-dN", "-dI", "-dU", "-fdebug-cpp", "-idirafter", "-I-", "-iprefix", "-iwithprefixbefore", "-isysroot", "-imultilib", "-nostdinc", "-nostdinc++", "-Wcomments", "-Wtrigraphs", "-Wundef", "-Wexpansion-to-defined", "-Wunused-macros", "-Wno-endif-labels"]);
+	}
+	if is_long_flag(ctx){
+		return with_format([]);
+	}
+	[]
+}
