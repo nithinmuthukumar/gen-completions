@@ -1,4 +1,5 @@
 //! For parsing command information from man pages
+mod darwin;
 pub mod error;
 mod podman;
 mod scdoc;
@@ -50,34 +51,22 @@ pub fn get_cmd_name(manpage_path: impl AsRef<Path>) -> String {
 
 /// Parse flags from a man page, trying all of the different parsers and merging
 /// their results if multiple parsers could parse the man page.
-///
-/// # Errors
-///
-/// Fails if none of the manpage parsers could understand the text, or if one of
-/// them encountered an error.
-pub fn parse_manpage_text(
-  cmd_name: &str,
-  text: impl AsRef<str>,
-) -> Result<Vec<Flag>> {
+pub fn parse_manpage_text(cmd_name: &str, text: impl AsRef<str>) -> Vec<Flag> {
   let text = text.as_ref();
 
-  let flags = [
+  // TODO remove duplicate flags
+  [
     type1::parse(cmd_name, text),
     type2::parse(cmd_name, text),
     type3::parse(cmd_name, text),
     type4::parse(cmd_name, text),
     scdoc::parse(cmd_name, text),
     podman::parse(cmd_name, text),
+    darwin::parse(cmd_name, text),
   ]
   .into_iter()
   .flatten()
-  .collect::<Vec<_>>();
-
-  if flags.is_empty() {
-    Err(Error::UnsupportedFormat())
-  } else {
-    Ok(flags)
-  }
+  .collect::<Vec<_>>()
 }
 
 /// Decompress a manpage if necessary
@@ -122,11 +111,16 @@ pub fn parse_from(
   let mut errors = Vec::new();
 
   let flags = if let Some(path) = pre_info.path {
-    match read_manpage(path) {
-      Ok(text) => parse_manpage_text(cmd_name, text).unwrap_or_else(|e| {
-        errors.push(e);
-        Vec::new()
-      }),
+    match read_manpage(path.clone()) {
+      Ok(text) => {
+        let all_flags = parse_manpage_text(cmd_name, text);
+        if all_flags.is_empty() {
+          errors.push(Error::UnsupportedFormat { path });
+          Vec::new()
+        } else {
+          all_flags
+        }
+      }
       Err(e) => {
         errors.push(e.into());
         Vec::new()
